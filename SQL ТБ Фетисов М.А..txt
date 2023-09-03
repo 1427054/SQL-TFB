@@ -1,0 +1,39 @@
+
+-- Напишите запрос, с помощью которого можно найти дубли в поле email из таблицы Sfaff.
+
+SELECT *
+  FROM (SELECT t.*,
+               row_number() OVER (PARTITION BY email ORDER BY t.staff_id) row_num
+          FROM STAFF t
+       )
+ WHERE row_num > 1;
+
+-- Напишите запрос, с помощью которого можно определить возраст каждого сотрудника из таблицы Staff на момент запроса.
+ 
+SELECT t.*,
+       ROUND(months_between(SYSDATE, t.birthday) / 12, 1) "Возраст"
+  FROM staff t;
+  
+
+-- Напишите запрос, с помощью которого можно определить должность (Jobtitles.name) со вторым по величине уровнем зарплаты.
+
+
+SELECT staff_id,
+       name,
+       salary,
+       email,
+       birthday,
+       jobtitles_name,
+       grade
+  FROM (SELECT t1.staff_id,
+               t1.name,
+               t1.salary,
+               t1.email,
+               t1.birthday,
+               t2.name jobtitles_name,
+               DENSE_RANK() OVER (ORDER BY t1.salary DESC) grade
+          FROM staff t1
+          JOIN jobtitles t2
+            ON t1.jobtitle_id = t2.jobtitle_id
+       ) temp
+ WHERE grade = 2;
